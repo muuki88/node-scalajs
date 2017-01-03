@@ -1,4 +1,4 @@
-enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
+enablePlugins(ScalaJSPlugin, NodeArchetypePlugin)
 
 name := "node-js-app"
 
