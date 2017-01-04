@@ -14,11 +14,12 @@ import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
 import scalajsbundler.util.JS
 
 /**
-  * Packages a production ready node application.
-  *
-  * @see [[https://github.com/scalacenter/scalajs-bundler/blob/master/sbt-scalajs-bundler/src/main/scala/scalajsbundler/Launcher.scala]]
-  * @see [[https://github.com/scalacenter/scalajs-bundler/blob/master/sbt-scalajs-bundler/src/main/scala/scalajsbundler/sbtplugin/ScalaJSBundlerPlugin.scala]]
-  */
+ * Packages a production ready node application.
+ *
+ * @see [[https://github.com/scalacenter/scalajs-bundler/blob/master/sbt-scalajs-bundler/src/main/scala/scalajsbundler/Launcher.scala]]
+ * @see [[https://github.com/scalacenter/scalajs-bundler/blob/master/sbt-scalajs-bundler/src/main/scala/scalajsbundler/sbtplugin/ScalaJSBundlerPlugin.scala]]
+ * @see [[https://github.com/scalacenter/scalajs-bundler/blob/master/sbt-scalajs-bundler/src/main/scala/scalajsbundler/PackageJson.scala]]
+ */
 object NodeArchetypePlugin extends AutoPlugin {
 
   // FIXME this is a very rough version. Needs some cleanup and structuring, but works.
@@ -48,15 +49,14 @@ object NodeArchetypePlugin extends AutoPlugin {
       val optimizedJavascript = (fullOptJS in Compile).value
       optimizedJavascript.data -> optimizedJavascript.data.getName
     },
-    mappings in Universal ++= MappingsHelper.directory(
-      (npmUpdate in Compile).value / "node_modules")
+    mappings in Universal ++= MappingsHelper.directory((npmUpdate in Compile).value / "node_modules")
   )
 
   private def writeLauncher(
-      launcherName: String,
-      targetDir: File,
-      sjsOutput: Attributed[File],
-      mainClass: String
+    launcherName: String,
+    targetDir: File,
+    sjsOutput: Attributed[File],
+    mainClass: String
   ): File = {
     val launcherContent = {
       // This differs from the default scalajs launcher
@@ -70,11 +70,11 @@ object NodeArchetypePlugin extends AutoPlugin {
   }
 
   /**
-    * @param mainClass Main class name
-    * @param module Module exporting the entry point
-    * @return A JavaScript program that calls the main method of the main class
-    */
-  def callEntryPoint(mainClass: String, module: JS): JS = {
+   * @param mainClass Main class name
+   * @param module Module exporting the entry point
+   * @return A JavaScript program that calls the main method of the main class
+   */
+  private def callEntryPoint(mainClass: String, module: JS): JS = {
     val mainClassRef =
       mainClass
         .split('.')

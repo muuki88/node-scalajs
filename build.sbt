@@ -10,4 +10,4 @@ npmDependencies in Compile ++= Seq(
 
 // custom webpack config to set target to 'node'
 useYarn := true
-webpackConfigFile := Some(baseDirectory.value / "webpack.node.config.js")
+//webpackConfigFile := Some(baseDirectory.value / "webpack.node.config.js")
