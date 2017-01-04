@@ -1,7 +1,7 @@
 package net.gutefrage.node
 
 import com.typesafe.sbt.SbtNativePackager.Universal
-import com.typesafe.sbt.packager.Keys.{executableScriptName, stage}
+import com.typesafe.sbt.packager.Keys.executableScriptName
 import com.typesafe.sbt.packager.MappingsHelper
 import com.typesafe.sbt.packager.universal.UniversalPlugin
 import org.scalajs.core.tools.io.{FileVirtualJSFile, VirtualJSFile}
@@ -9,13 +9,15 @@ import sbt._
 import sbt.Keys._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
-import scalajsbundler.{NpmDependencies, PackageJson}
+import scalajsbundler.{NpmDependencies, PackageJson, Yarn}
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
 import scalajsbundler.util.JS
 
 /**
  * Packages a production ready node application.
+ *
+ * Requires yarn.
  *
  * @see [[https://github.com/scalacenter/scalajs-bundler/blob/master/sbt-scalajs-bundler/src/main/scala/scalajsbundler/Launcher.scala]]
  * @see [[https://github.com/scalacenter/scalajs-bundler/blob/master/sbt-scalajs-bundler/src/main/scala/scalajsbundler/sbtplugin/ScalaJSBundlerPlugin.scala]]
@@ -28,13 +30,8 @@ object NodeArchetypePlugin extends AutoPlugin {
   override lazy val requires: Plugins = ScalaJSBundlerPlugin && UniversalPlugin
 
   override def projectSettings: Seq[Setting[_]] = Seq(
+    useYarn := true,
     (crossTarget in packageBin in (Compile, npmUpdate)) := crossTarget.value / "scalajs-bundler" / "universal",
-//    scalaJSBundlerPackageJson in packageBin := createPackageJson(
-//      npmDependencies.value,
-//      npmResolutions.value,
-//      fullClasspath.value,
-//      streams.value.log
-//    ),
     scalaJSLauncher in packageBin := {
       val targetDir = (crossTarget in packageBin in (Compile, npmUpdate)).value
       val scriptName = (executableScriptName in Universal).value
@@ -53,7 +50,15 @@ object NodeArchetypePlugin extends AutoPlugin {
       val optimizedJavascript = (fullOptJS in Compile).value
       optimizedJavascript.data -> optimizedJavascript.data.getName
     },
-    mappings in Universal ++= MappingsHelper.directory((npmUpdate in Compile).value / "node_modules")
+    mappings in Universal ++= {
+      // FIXME remove all the dev dependencies and install only production dependencies before packaging
+      // see https://github.com/scalacenter/scalajs-bundler/pull/82
+      val targetDir = (npmUpdate in Compile).value
+      val nodeModules = targetDir / "node_modules"
+      IO.delete(nodeModules)
+      Yarn.run("install", "--production")(targetDir, streams.value.log)
+      MappingsHelper.directory(nodeModules)
+    }
   )
 
   private def writeLauncher(
@@ -86,6 +91,16 @@ object NodeArchetypePlugin extends AutoPlugin {
     mainClassRef.apply().dot("main").apply()
   }
 
+  /**
+   * Unused until https://github.com/scalacenter/scalajs-bundler/pull/82 is merged
+   * or another solutions is found.
+   * @param targetDir
+   * @param npmDependencies
+   * @param npmResolutions
+   * @param fullClasspath
+   * @param log
+   * @return
+   */
   private def createPackageJson(targetDir: File,
                                 npmDependencies: Seq[(String, String)],
                                 npmResolutions: Map[String, String],

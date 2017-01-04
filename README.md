@@ -4,7 +4,7 @@ Bundles a scalajs cli app as a node.js app. You can create the app with
 
 ## Requirements
 
-You need to have `node` installed.
+You need to have `node` and `yarn` installed.
 
 ## Run
 
@@ -27,3 +27,7 @@ Packaging everything together.
 ```bash
 sbt universal:packageBin
 ```
+
+# Resources
+
+- [scalajs playground](https://github.com/Sebruck/scalajs-playground)
