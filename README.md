@@ -8,7 +8,7 @@ You need to have `node` installed.
 
 ## Run
 
-```scala
+```bash
 sbt fullOptJS::webpack
 node target/scala-2.12/scalajs-bundler/main/opt-launcher.js
 ```
@@ -17,7 +17,13 @@ node target/scala-2.12/scalajs-bundler/main/opt-launcher.js
 
 You can package the node application with sbt-native-packager.
 
-```scala
+```bash
 sbt stage
-node  target/universal/stage/opt-launcher.js
+node  target/universal/stage/node-js-app.js
+```
+
+Packaging everything together.
+
+```bash
+sbt universal:packageBin
 ```
