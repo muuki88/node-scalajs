@@ -20,8 +20,6 @@ import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
  */
 object NodeArchetypePlugin extends AutoPlugin {
 
-  // FIXME this is a very rough version. Needs some cleanup and structuring, but works.
-
   override lazy val requires: Plugins = ScalaJSBundlerPlugin && UniversalPlugin
 
   private val generateNodeWebpackConfig: TaskKey[Unit] =
